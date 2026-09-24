@@ -5,7 +5,10 @@ function App() {
     <>
       <Navbar />
 
-      <h1>Welcome to Airbnb</h1>
+      <main>
+        <h1>Find your next stay</h1>
+        <p>Search for homes, experiences and more.</p>
+      </main>
     </>
   );
 }
