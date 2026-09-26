@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navbar from "./components/Navbar";
 import SearchBar from "./components/SearchBar";
 import PropertyCard from "./components/PropertyCard";
@@ -27,6 +28,23 @@ const properties = [
 ];
 
 function App() {
+  const [searchData, setSearchData] = useState({
+    destination: "",
+    checkIn: "",
+    checkOut: "",
+    guests: 0,
+  });
+
+  const filteredProperties = properties.filter((property) => {
+    if (!searchData.destination) {
+      return true;
+    }
+
+    return property.location
+      .toLowerCase()
+      .includes(searchData.destination.toLowerCase());
+  });
+
   return (
     <>
       <Navbar />
@@ -34,10 +52,18 @@ function App() {
       <main>
         <h1>Find your next stay</h1>
 
-        <SearchBar />
+        <SearchBar onSearch={setSearchData} />
+
+        {searchData.destination && (
+          <div className="search-result">
+            {filteredProperties.length > 0
+              ? `${filteredProperties.length} properties found in ${searchData.destination}`
+              : `No properties found in ${searchData.destination}`}
+          </div>
+        )}
 
         <div className="property-list">
-          {properties.map((property) => (
+          {filteredProperties.map((property) => (
             <PropertyCard
               key={property.location}
               image={property.image}

@@ -1,15 +1,26 @@
 import { useState } from "react";
 
-function SearchBar() {
+function SearchBar({ onSearch }) {
   const [destination, setDestination] = useState("");
   const [guests, setGuests] = useState(0);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
+  const [searched, setSearched] = useState(false);
+
+  const handleSearch = () => {
+    setSearched(true);
+
+    onSearch({
+      destination,
+      checkIn,
+      checkOut,
+      guests,
+    });
+  };
 
   return (
     <div className="search-container">
       <div className="search-bar">
-
         <div className="search-item">
           <span>Where</span>
           <p>{destination || "Search destinations"}</p>
@@ -17,6 +28,7 @@ function SearchBar() {
 
         <div className="search-item">
           <span>Check in</span>
+
           <input
             type="date"
             value={checkIn}
@@ -26,16 +38,18 @@ function SearchBar() {
 
         <div className="search-item">
           <span>Check out</span>
+
           <input
-  type="date"
-  value={checkOut}
-  min={checkIn}
-  onChange={(e) => setCheckOut(e.target.value)}
-/>
+            type="date"
+            value={checkOut}
+            min={checkIn}
+            onChange={(e) => setCheckOut(e.target.value)}
+          />
         </div>
 
         <div className="search-item">
           <span>Who</span>
+
           <p>
             {guests === 0
               ? "Add guests"
@@ -43,14 +57,15 @@ function SearchBar() {
           </p>
         </div>
 
-        <button className="search-button">
+        <button
+          className="search-button"
+          onClick={handleSearch}
+        >
           🔍
         </button>
-
       </div>
 
       <div className="destination-options">
-
         <button onClick={() => setDestination("Goa, India")}>
           Goa
         </button>
@@ -62,11 +77,9 @@ function SearchBar() {
         <button onClick={() => setDestination("Jaipur, India")}>
           Jaipur
         </button>
-
       </div>
 
       <div className="guest-options">
-
         <span>Guests</span>
 
         <button
@@ -81,8 +94,13 @@ function SearchBar() {
         <button onClick={() => setGuests(guests + 1)}>
           +
         </button>
-
       </div>
+
+      {searched && (
+        <p className="search-message">
+          Search completed
+        </p>
+      )}
     </div>
   );
 }

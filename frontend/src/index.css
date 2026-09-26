@@ -303,3 +303,17 @@ main p {
   background: transparent;
   cursor: pointer;
 }
+
+.search-result {
+  margin-top: 20px;
+  color: #555;
+  font-size: 16px;
+}
+
+.search-result,
+.search-message {
+  margin-top: 20px;
+  color: #555;
+  font-size: 16px;
+  font-weight: 500;
+}
