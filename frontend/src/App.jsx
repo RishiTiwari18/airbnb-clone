@@ -10,6 +10,7 @@ const properties = [
     location: "Goa, India",
     price: 4500,
     rating: 4.8,
+    maxGuests: 4,
   },
   {
     image:
@@ -17,6 +18,7 @@ const properties = [
     location: "Manali, India",
     price: 3200,
     rating: 4.7,
+    maxGuests: 3,
   },
   {
     image:
@@ -24,6 +26,7 @@ const properties = [
     location: "Jaipur, India",
     price: 2800,
     rating: 4.9,
+    maxGuests: 2,
   },
 ];
 
@@ -34,17 +37,19 @@ function App() {
     checkOut: "",
     guests: 0,
   });
-
-  const filteredProperties = properties.filter((property) => {
-    if (!searchData.destination) {
-      return true;
-    }
-
-    return property.location
+const filteredProperties = properties.filter((property) => {
+  const destinationMatch =
+    !searchData.destination ||
+    property.location
       .toLowerCase()
       .includes(searchData.destination.toLowerCase());
-  });
 
+  const guestsMatch =
+    searchData.guests === 0 ||
+    property.maxGuests >= searchData.guests;
+
+  return destinationMatch && guestsMatch;
+});
   return (
     <>
       <Navbar />

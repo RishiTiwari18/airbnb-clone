@@ -8,15 +8,30 @@ function SearchBar({ onSearch }) {
   const [searched, setSearched] = useState(false);
 
   const handleSearch = () => {
-    setSearched(true);
+  if (!destination) {
+    alert("Please select a destination");
+    return;
+  }
 
-    onSearch({
-      destination,
-      checkIn,
-      checkOut,
-      guests,
-    });
-  };
+  if (!checkIn) {
+    alert("Please select check-in date");
+    return;
+  }
+
+  if (!checkOut) {
+    alert("Please select check-out date");
+    return;
+  }
+
+  onSearch({
+    destination,
+    checkIn,
+    checkOut,
+    guests,
+  });
+
+  setSearched(true);
+};
 
   return (
     <div className="search-container">
@@ -30,10 +45,18 @@ function SearchBar({ onSearch }) {
           <span>Check in</span>
 
           <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-          />
+  type="date"
+  value={checkIn}
+  onChange={(e) => {
+    const selectedDate = e.target.value;
+
+    setCheckIn(selectedDate);
+
+    if (checkOut && selectedDate > checkOut) {
+      setCheckOut("");
+    }
+  }}
+/>
         </div>
 
         <div className="search-item">
@@ -91,9 +114,12 @@ function SearchBar({ onSearch }) {
 
         <strong>{guests}</strong>
 
-        <button onClick={() => setGuests(guests + 1)}>
-          +
-        </button>
+        <button
+  onClick={() => setGuests(guests + 1)}
+  disabled={guests === 10}
+>
+  +
+</button>
       </div>
 
       {searched && (
