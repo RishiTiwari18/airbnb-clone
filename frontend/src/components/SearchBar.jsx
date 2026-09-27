@@ -8,8 +8,8 @@ function SearchBar({ onSearch }) {
   const [searched, setSearched] = useState(false);
 
   const handleSearch = () => {
-    if (!destination) {
-      alert("Please select a destination");
+    if (!destination.trim()) {
+      alert("Please enter a destination");
       return;
     }
 
@@ -24,7 +24,7 @@ function SearchBar({ onSearch }) {
     }
 
     onSearch({
-      destination,
+      destination: destination.trim(),
       checkIn,
       checkOut,
       guests,
@@ -35,14 +35,20 @@ function SearchBar({ onSearch }) {
 
   return (
     <div className="search-container">
+
       <div className="search-bar">
 
-        <div className="search-item">
+        <div className="search-item destination-input">
           <span>Where</span>
 
-          <p>
-            {destination || "Search destinations"}
-          </p>
+          <input
+            type="text"
+            placeholder="Search destinations"
+            value={destination}
+            onChange={(e) =>
+              setDestination(e.target.value)
+            }
+          />
         </div>
 
         <div className="search-item">
@@ -101,6 +107,7 @@ function SearchBar({ onSearch }) {
       </div>
 
       <div className="destination-options">
+
         <button
           onClick={() =>
             setDestination("Goa, India")
@@ -124,9 +131,11 @@ function SearchBar({ onSearch }) {
         >
           Jaipur
         </button>
+
       </div>
 
       <div className="guest-options">
+
         <span>Guests</span>
 
         <button
@@ -144,6 +153,7 @@ function SearchBar({ onSearch }) {
         >
           +
         </button>
+
       </div>
 
       {searched && (
@@ -151,6 +161,7 @@ function SearchBar({ onSearch }) {
           Search completed
         </p>
       )}
+
     </div>
   );
 }

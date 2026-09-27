@@ -426,3 +426,44 @@ main p {
     font-size: 14px;
   }
 }
+
+.wishlist-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: white;
+
+  font-size: 24px;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.wishlist-button:hover {
+  transform: scale(1.08);
+}
+
+.destination-input input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.destination-input input::placeholder {
+  color: #777;
+}
