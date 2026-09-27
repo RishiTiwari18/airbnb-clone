@@ -325,3 +325,104 @@ main p {
   font-size: 16px;
   font-weight: 500;
 }
+
+.property-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.property-details {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+  text-align: left;
+}
+
+.details-image {
+  width: 100%;
+  height: 500px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.details-content {
+  padding: 25px 0;
+}
+
+.details-content h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.details-content p {
+  margin: 12px 0;
+  color: #555;
+}
+
+.property-features {
+  display: flex;
+  gap: 30px;
+  margin: 25px 0;
+}
+
+.property-features span {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.reserve-button {
+  margin-top: 20px;
+  padding: 14px 30px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.category-bar {
+  display: flex;
+  gap: 25px;
+  margin: 30px 0;
+  padding: 10px 0;
+  overflow-x: auto;
+}
+
+.category-button {
+  background: none;
+  border: none;
+  padding: 10px 5px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.category-button:hover {
+  color: #222;
+}
+
+.category-button.active {
+  color: #222;
+  font-weight: bold;
+  border-bottom: 2px solid #222;
+}
+
+.no-results {
+  margin-top: 30px;
+  font-size: 18px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .category-bar {
+    gap: 15px;
+    margin: 20px 0;
+  }
+
+  .category-button {
+    font-size: 14px;
+  }
+}

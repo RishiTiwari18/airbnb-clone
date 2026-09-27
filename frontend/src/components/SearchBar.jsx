@@ -8,55 +8,62 @@ function SearchBar({ onSearch }) {
   const [searched, setSearched] = useState(false);
 
   const handleSearch = () => {
-  if (!destination) {
-    alert("Please select a destination");
-    return;
-  }
+    if (!destination) {
+      alert("Please select a destination");
+      return;
+    }
 
-  if (!checkIn) {
-    alert("Please select check-in date");
-    return;
-  }
+    if (!checkIn) {
+      alert("Please select check-in date");
+      return;
+    }
 
-  if (!checkOut) {
-    alert("Please select check-out date");
-    return;
-  }
+    if (!checkOut) {
+      alert("Please select check-out date");
+      return;
+    }
 
-  onSearch({
-    destination,
-    checkIn,
-    checkOut,
-    guests,
-  });
+    onSearch({
+      destination,
+      checkIn,
+      checkOut,
+      guests,
+    });
 
-  setSearched(true);
-};
+    setSearched(true);
+  };
 
   return (
     <div className="search-container">
       <div className="search-bar">
+
         <div className="search-item">
           <span>Where</span>
-          <p>{destination || "Search destinations"}</p>
+
+          <p>
+            {destination || "Search destinations"}
+          </p>
         </div>
 
         <div className="search-item">
           <span>Check in</span>
 
           <input
-  type="date"
-  value={checkIn}
-  onChange={(e) => {
-    const selectedDate = e.target.value;
+            type="date"
+            value={checkIn}
+            onChange={(e) => {
+              const selectedDate = e.target.value;
 
-    setCheckIn(selectedDate);
+              setCheckIn(selectedDate);
 
-    if (checkOut && selectedDate > checkOut) {
-      setCheckOut("");
-    }
-  }}
-/>
+              if (
+                checkOut &&
+                selectedDate > checkOut
+              ) {
+                setCheckOut("");
+              }
+            }}
+          />
         </div>
 
         <div className="search-item">
@@ -66,7 +73,9 @@ function SearchBar({ onSearch }) {
             type="date"
             value={checkOut}
             min={checkIn}
-            onChange={(e) => setCheckOut(e.target.value)}
+            onChange={(e) =>
+              setCheckOut(e.target.value)
+            }
           />
         </div>
 
@@ -76,7 +85,9 @@ function SearchBar({ onSearch }) {
           <p>
             {guests === 0
               ? "Add guests"
-              : `${guests} guest${guests > 1 ? "s" : ""}`}
+              : `${guests} guest${
+                  guests > 1 ? "s" : ""
+                }`}
           </p>
         </div>
 
@@ -86,18 +97,31 @@ function SearchBar({ onSearch }) {
         >
           🔍
         </button>
+
       </div>
 
       <div className="destination-options">
-        <button onClick={() => setDestination("Goa, India")}>
+        <button
+          onClick={() =>
+            setDestination("Goa, India")
+          }
+        >
           Goa
         </button>
 
-        <button onClick={() => setDestination("Manali, India")}>
+        <button
+          onClick={() =>
+            setDestination("Manali, India")
+          }
+        >
           Manali
         </button>
 
-        <button onClick={() => setDestination("Jaipur, India")}>
+        <button
+          onClick={() =>
+            setDestination("Jaipur, India")
+          }
+        >
           Jaipur
         </button>
       </div>
@@ -115,11 +139,11 @@ function SearchBar({ onSearch }) {
         <strong>{guests}</strong>
 
         <button
-  onClick={() => setGuests(guests + 1)}
-  disabled={guests === 10}
->
-  +
-</button>
+          onClick={() => setGuests(guests + 1)}
+          disabled={guests === 10}
+        >
+          +
+        </button>
       </div>
 
       {searched && (
