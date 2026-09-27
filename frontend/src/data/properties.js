@@ -1,45 +1,98 @@
 const properties = [
   {
     id: 1,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1540541338287-41700207dee6",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b",
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d",
+      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea",
+    ],
     location: "Goa, India",
     price: 4500,
     rating: 4.8,
+    reviews: 124,
     maxGuests: 4,
     bedrooms: 2,
     bathrooms: 1,
+    beds: 2,
     category: "Beach",
+    host: "Rahul",
+    hostExperience: "Hosting for 4 years",
     description:
-      "Beautiful stay near the beach with a peaceful environment.",
+      "Beautiful stay near the beach with a peaceful environment. Enjoy comfortable rooms, modern facilities and easy access to the beach.",
+    amenities: [
+      "WiFi",
+      "Pool",
+      "Kitchen",
+      "Air conditioning",
+      "Free parking",
+      "TV",
+    ],
   },
+
   {
     id: 2,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1605649487212-47bdab064df7",
+      "https://images.unsplash.com/photo-1544986581-efac024faf62",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb",
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461",
+    ],
     location: "Manali, India",
     price: 3200,
     rating: 4.7,
+    reviews: 98,
     maxGuests: 3,
     bedrooms: 2,
     bathrooms: 1,
+    beds: 2,
     category: "Mountain",
+    host: "Aman",
+    hostExperience: "Hosting for 3 years",
     description:
-      "A comfortable mountain stay with beautiful views.",
+      "A comfortable mountain stay with beautiful views. Perfect for families and friends looking for a peaceful getaway.",
+    amenities: [
+      "WiFi",
+      "Mountain view",
+      "Kitchen",
+      "Heating",
+      "Free parking",
+      "TV",
+    ],
   },
+
   {
     id: 3,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1599661046289-e31897846e41",
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427",
+      "https://images.unsplash.com/photo-1560185008-b033106af5c3",
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811",
+    ],
     location: "Jaipur, India",
     price: 2800,
     rating: 4.9,
+    reviews: 156,
     maxGuests: 2,
     bedrooms: 1,
     bathrooms: 1,
+    beds: 1,
     category: "Heritage",
+    host: "Priya",
+    hostExperience: "Hosting for 5 years",
     description:
-      "A traditional and comfortable stay in the heart of Jaipur.",
+      "A traditional and comfortable stay in the heart of Jaipur with beautiful interiors and easy access to popular attractions.",
+    amenities: [
+      "WiFi",
+      "Kitchen",
+      "Air conditioning",
+      "Breakfast",
+      "TV",
+      "Free parking",
+    ],
   },
 ];
 

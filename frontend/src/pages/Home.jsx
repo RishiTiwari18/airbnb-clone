@@ -54,7 +54,7 @@ function Home() {
             <PropertyCard
               key={property.id}
               id={property.id}
-              image={property.image}
+              images={property.images}
               location={property.location}
               price={property.price}
               rating={property.rating}

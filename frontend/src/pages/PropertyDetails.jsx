@@ -1,5 +1,11 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+
 import properties from "../data/properties";
+
+import ImageGallery from "../components/ImageGallery";
+import HostInfo from "../components/HostInfo";
+import Amenities from "../components/Amenities";
+import BookingCard from "../components/BookingCard";
 
 function PropertyDetails() {
   const { id } = useParams();
@@ -9,42 +15,98 @@ function PropertyDetails() {
   );
 
   if (!property) {
-    return <h2>Property not found</h2>;
+    return (
+      <main className="property-not-found">
+        <h2>Property not found</h2>
+
+        <Link to="/">
+          Go back to home
+        </Link>
+      </main>
+    );
   }
 
   return (
-    <main className="property-details">
-      <img
-        src={property.image}
-        alt={property.location}
-        className="details-image"
-      />
+    <main className="property-details-page">
 
-      <div className="details-content">
-        <h1>{property.location}</h1>
+      <div className="details-header">
 
-        <p>★ {property.rating}</p>
+        <Link
+          to="/"
+          className="back-button"
+        >
+          ← Back
+        </Link>
 
-        <p>{property.description}</p>
-
-        <div className="property-features">
-          <span>{property.maxGuests} guests</span>
-
-          <span>
-            {property.bedrooms} bedrooms
-          </span>
-
-          <span>
-            {property.bathrooms} bathroom
-          </span>
+        <div className="details-actions">
+          <button>Share</button>
+          <button>Save</button>
         </div>
 
-        <h2>₹{property.price} / night</h2>
-
-        <button className="reserve-button">
-          Reserve
-        </button>
       </div>
+
+      <h1 className="details-title">
+        {property.location}
+      </h1>
+
+      <div className="details-rating">
+
+        <span>
+          ★ {property.rating}
+        </span>
+
+        <span>·</span>
+
+        <span>
+          {property.reviews} reviews
+        </span>
+
+      </div>
+
+      <ImageGallery
+        images={property.images}
+        location={property.location}
+      />
+
+      <div className="details-layout">
+
+        <section className="details-main">
+
+          <HostInfo
+            location={property.location}
+            maxGuests={property.maxGuests}
+            bedrooms={property.bedrooms}
+            beds={property.beds}
+            bathrooms={property.bathrooms}
+            host={property.host}
+            hostExperience={property.hostExperience}
+          />
+
+          <div className="details-section">
+
+            <h2>About this place</h2>
+
+            <p>
+              {property.description}
+            </p>
+
+          </div>
+
+          <Amenities
+            amenities={property.amenities}
+          />
+
+        </section>
+
+        <BookingCard
+          price={property.price}
+          rating={property.rating}
+          reviews={property.reviews}
+          maxGuests={property.maxGuests}
+        />
+
+      </div>
+
     </main>
   );
 }
