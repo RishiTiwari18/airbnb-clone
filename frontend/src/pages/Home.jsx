@@ -4,8 +4,6 @@ import SearchBar from "../components/SearchBar";
 import PropertyCard from "../components/PropertyCard";
 import CategoryBar from "../components/CategoryBar";
 
-import properties from "../data/properties.js";
-
 function Home() {
   const [propertyData, setPropertyData] =
     useState([]);
@@ -28,20 +26,31 @@ function Home() {
     useState("All");
 
   useEffect(() => {
-    const loadProperties = () => {
+    const loadProperties = async () => {
       try {
         setLoading(true);
         setError("");
 
-        setTimeout(() => {
-          setPropertyData(properties);
-          setLoading(false);
-        }, 1000);
+        const response = await fetch(
+          "http://localhost:5000/api/properties"
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to fetch properties"
+          );
+        }
+
+        const data = await response.json();
+
+        setPropertyData(data);
       } catch (error) {
+        console.error(error);
+
         setError(
           "Unable to load properties"
         );
-
+      } finally {
         setLoading(false);
       }
     };
