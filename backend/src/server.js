@@ -1,105 +1,233 @@
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
+const propertySchema = new mongoose.Schema({
+  location: {
+    type: String,
+    required: true,
+  },
+
+  price: {
+    type: Number,
+    required: true,
+  },
+
+  rating: {
+    type: Number,
+    required: true,
+  },
+
+  reviews: {
+    type: Number,
+    required: true,
+  },
+
+  maxGuests: {
+    type: Number,
+    required: true,
+  },
+
+  bedrooms: {
+    type: Number,
+    required: true,
+  },
+
+  bathrooms: {
+    type: Number,
+    required: true,
+  },
+
+  beds: {
+    type: Number,
+    required: true,
+  },
+
+  category: {
+    type: String,
+    required: true,
+  },
+
+  host: {
+    type: String,
+    required: true,
+  },
+
+  hostExperience: {
+    type: String,
+    required: true,
+  },
+
+  description: {
+    type: String,
+    required: true,
+  },
+
+  images: {
+    type: [String],
+    required: true,
+  },
+
+  amenities: {
+    type: [String],
+    required: true,
+  },
+});
+
+const Property = mongoose.model(
+  "Property",
+  propertySchema
+);
 
 app.get("/", (req, res) => {
   res.send("Airbnb Backend is running");
 });
 
-app.get("/api/properties", (req, res) => {
-  res.json([
-    {
-      id: 1,
-      location: "Goa, India",
-      price: 4500,
-      rating: 4.8,
-      reviews: 124,
-      maxGuests: 4,
-      bedrooms: 2,
-      bathrooms: 1,
-      beds: 2,
-      category: "Beach",
-      host: "Rahul",
-      hostExperience: "Hosting for 4 years",
-      description:
-        "Beautiful stay near the beach with a peaceful environment.",
-      images: [
-        "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=80"
-      ],
-      amenities: [
-        "WiFi",
-        "Pool",
-        "Kitchen",
-        "Air conditioning",
-        "Free parking",
-        "TV"
-      ]
-    },
+app.get("/api/properties", async (req, res) => {
+  try {
+    const properties = await Property.find();
 
-    {
-      id: 2,
-      location: "Manali, India",
-      price: 3200,
-      rating: 4.7,
-      reviews: 98,
-      maxGuests: 3,
-      bedrooms: 2,
-      bathrooms: 1,
-      beds: 2,
-      category: "Mountain",
-      host: "Aman",
-      hostExperience: "Hosting for 3 years",
-      description:
-        "A comfortable mountain stay with beautiful views.",
-      images: [
-        "https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80"
-      ],
-      amenities: [
-        "WiFi",
-        "Kitchen",
-        "Heating",
-        "Free parking",
-        "TV"
-      ]
-    },
+    res.status(200).json(properties);
+  } catch (error) {
+    console.error(error);
 
-    {
-      id: 3,
-      location: "Jaipur, India",
-      price: 2800,
-      rating: 4.9,
-      reviews: 156,
-      maxGuests: 2,
-      bedrooms: 1,
-      bathrooms: 1,
-      beds: 1,
-      category: "Heritage",
-      host: "Priya",
-      hostExperience: "Hosting for 5 years",
-      description:
-        "A traditional and comfortable stay in Jaipur.",
-      images: [
-        "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80"
-      ],
-      amenities: [
-        "WiFi",
-        "Kitchen",
-        "Breakfast",
-        "TV",
-        "Free parking"
-      ]
+    res.status(500).json({
+      message: "Failed to fetch properties",
+    });
+  }
+});
+
+app.get("/api/properties/:id", async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid Property ID",
+      });
     }
-  ]);
+
+    const property = await Property.findById(
+      req.params.id
+    );
+
+    if (!property) {
+      return res.status(404).json({
+        message: "Property not found",
+      });
+    }
+
+    res.status(200).json(property);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch property",
+    });
+  }
 });
 
-app.listen(PORT, () => {
-  console.log(
-    `Server running on http://localhost:${PORT}`
-  );
+app.post("/api/properties", async (req, res) => {
+  try {
+    const property = await Property.create(
+      req.body
+    );
+
+    res.status(201).json(property);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to create property",
+    });
+  }
 });
+
+app.put("/api/properties/:id", async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid Property ID",
+      });
+    }
+
+    const property =
+      await Property.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+    if (!property) {
+      return res.status(404).json({
+        message: "Property not found",
+      });
+    }
+
+    res.status(200).json(property);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to update property",
+    });
+  }
+});
+
+app.delete("/api/properties/:id", async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid Property ID",
+      });
+    }
+
+    const property =
+      await Property.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!property) {
+      return res.status(404).json({
+        message: "Property not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Property deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete property",
+    });
+  }
+});
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully");
+
+    app.listen(PORT, () => {
+      console.log(
+        `Server running on http://localhost:${PORT}`
+      );
+    });
+  })
+  .catch((error) => {
+    console.error(
+      "MongoDB connection failed:",
+      error.message
+    );
+  });
