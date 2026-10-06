@@ -3,7 +3,9 @@ const cors = require("cors");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
+
 const propertyRoutes = require("./routes/propertyRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
@@ -16,7 +18,15 @@ app.get("/", (req, res) => {
   res.send("Airbnb Backend is running");
 });
 
-app.use("/api/properties", propertyRoutes);
+app.use(
+  "/api/properties",
+  propertyRoutes
+);
+
+app.use(
+  "/api/auth",
+  authRoutes
+);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
