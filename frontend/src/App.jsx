@@ -7,6 +7,7 @@ import PropertyDetails from "./pages/PropertyDetails";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Wishlist from "./pages/Wishlist";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -44,6 +45,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/wishlist"
+  element={
+    <ProtectedRoute>
+      <Wishlist />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </>
   );
