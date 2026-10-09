@@ -1,27 +1,50 @@
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
 function Navbar() {
+  const { user, logout, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
-    <header className="navbar">
+    <nav className="navbar">
+      <Link to="/" className="navbar-logo">
+        Airbnb Clone
+      </Link>
 
-      {/* Logo */}
-      <div className="logo">
-        airbnb
+      <div className="navbar-links">
+        <Link to="/">Home</Link>
+
+        {!loading && (
+          user ? (
+            <>
+              <Link to="/profile">Profile</Link>
+
+              <span className="navbar-username">
+                Hi, {user.name}
+              </span>
+
+              <button
+                type="button"
+                className="navbar-button"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/register">Register</Link>
+            </>
+          )
+        )}
       </div>
-
-      {/* Navigation */}
-      <nav className="nav-links">
-        <button>Homes</button>
-        <button>Experiences</button>
-        <button>Online Experiences</button>
-      </nav>
-
-      {/* Right side */}
-      <div className="nav-right">
-        <button>Airbnb your home</button>
-        <button>🌐</button>
-        <button>☰ 👤</button>
-      </div>
-
-    </header>
+    </nav>
   );
 }
 
