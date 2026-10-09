@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 
 const propertyRoutes = require("./routes/propertyRoutes");
 const authRoutes = require("./routes/authRoutes");
+const wishlistRoutes = require("./routes/wishlistRoutes");
 
 const app = express();
 
@@ -18,20 +19,19 @@ app.get("/", (req, res) => {
   res.send("Airbnb Backend is running");
 });
 
-app.use(
-  "/api/properties",
-  propertyRoutes
-);
+app.use("/api/properties", propertyRoutes);
 
-app.use(
-  "/api/auth",
-  authRoutes
-);
+app.use("/api/auth", authRoutes);
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(
-      `Server running on http://localhost:${PORT}`
-    );
+app.use("/api/wishlist", wishlistRoutes);
+
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to connect to MongoDB:", error.message);
+    process.exit(1);
   });
-});
