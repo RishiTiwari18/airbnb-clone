@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
+import MyBookings from "./pages/MyBookings";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -45,14 +46,24 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
-  path="/wishlist"
-  element={
-    <ProtectedRoute>
-      <Wishlist />
-    </ProtectedRoute>
-  }
-/>
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-bookings"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );

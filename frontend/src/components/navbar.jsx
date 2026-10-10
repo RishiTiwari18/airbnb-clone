@@ -87,6 +87,18 @@ function Navbar() {
                 </Link>
 
                 <Link
+                  to="/my-bookings"
+                  className={`navbar-link ${
+                    isActive("/my-bookings")
+                      ? "navbar-link-active"
+                      : ""
+                  }`}
+                  onClick={closeMenu}
+                >
+                  My Bookings
+                </Link>
+
+                <Link
                   to="/profile"
                   className={`navbar-link ${
                     isActive("/profile")
