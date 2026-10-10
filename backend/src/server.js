@@ -7,6 +7,7 @@ const connectDB = require("./config/db");
 const propertyRoutes = require("./routes/propertyRoutes");
 const authRoutes = require("./routes/authRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
 const app = express();
 
@@ -20,10 +21,9 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/properties", propertyRoutes);
-
 app.use("/api/auth", authRoutes);
-
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 connectDB()
   .then(() => {
