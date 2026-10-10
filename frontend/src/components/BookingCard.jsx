@@ -1,213 +1,228 @@
 import { useState } from "react";
+import { createBooking } from "../services/bookingService";
 
-function BookingCard({
-  price,
-  rating,
-  reviews,
-  maxGuests,
-}) {
+function BookingCard({ property }) {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
-  const [error, setError] = useState("");
-  const [booked, setBooked] = useState(false);
 
-  const calculateNights = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  if (!property) {
+    return null;
+  }
+
+  const pricePerNight = Number(
+    property.price ?? property.pricePerNight ?? 0
+  );
+
+  const maxGuests = Math.max(
+    1,
+    Number(property.maxGuests) || 1
+  );
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const getNights = () => {
     if (!checkIn || !checkOut) {
       return 0;
     }
 
-    const startDate = new Date(checkIn);
-    const endDate = new Date(checkOut);
+    const start = Date.parse(`${checkIn}T00:00:00.000Z`);
+    const end = Date.parse(`${checkOut}T00:00:00.000Z`);
 
-    const difference =
-      endDate.getTime() - startDate.getTime();
+    if (
+      !Number.isFinite(start) ||
+      !Number.isFinite(end) ||
+      end <= start
+    ) {
+      return 0;
+    }
 
-    const nights =
-      difference / (1000 * 60 * 60 * 24);
-
-    return nights;
+    return Math.round(
+      (end - start) / (24 * 60 * 60 * 1000)
+    );
   };
 
-  const nights = calculateNights();
+  const nights = getNights();
+  const totalPrice = nights * pricePerNight;
 
-  const totalPrice =
-    nights > 0 ? nights * price : 0;
+  const handleBooking = async (event) => {
+    event.preventDefault();
 
-  const handleReserve = () => {
     setError("");
+    setSuccess("");
 
-    if (!checkIn) {
-      setError("Please select check-in date");
+    if (!localStorage.getItem("token")) {
+      setError("Please log in before booking a property.");
       return;
     }
 
-    if (!checkOut) {
-      setError("Please select check-out date");
+    if (!checkIn || !checkOut) {
+      setError("Please select check-in and check-out dates.");
+      return;
+    }
+
+    if (checkIn < today) {
+      setError("Check-in date cannot be in the past.");
       return;
     }
 
     if (checkOut <= checkIn) {
-      setError(
-        "Check-out date must be after check-in date"
-      );
+      setError("Check-out must be after check-in.");
       return;
     }
 
-    if (guests > maxGuests) {
-      setError(
-        `Maximum ${maxGuests} guests allowed`
-      );
+    if (guests < 1 || guests > maxGuests) {
+      setError(`Guests must be between 1 and ${maxGuests}.`);
       return;
     }
 
-    setBooked(true);
+    if (!property._id) {
+      setError("Property ID is missing. Please refresh the page.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await createBooking({
+        propertyId: property._id,
+        checkIn,
+        checkOut,
+        guests: Number(guests),
+      });
+
+      setSuccess(
+        "Booking created successfully! Your booking has been saved."
+      );
+
+      setCheckIn("");
+      setCheckOut("");
+      setGuests(1);
+    } catch (err) {
+      setError(
+        err.message || "Unable to create booking. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <aside className="booking-card">
+    <section className="booking-card">
+      <h2>Reserve your stay</h2>
 
-      <div className="booking-price">
+      <p className="booking-nightly-price">
         <strong>
-          ₹{price}
-        </strong>
-
-        <span> night</span>
-      </div>
-
-      <div className="booking-rating">
-        ★ {rating} · {reviews} reviews
-      </div>
-
-      <div className="booking-fields">
-
-        <div className="booking-field">
-          <label>CHECK-IN</label>
-
-          <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => {
-              setCheckIn(e.target.value);
-
-              if (
-                checkOut &&
-                e.target.value >= checkOut
-              ) {
-                setCheckOut("");
-              }
-
-              setError("");
-              setBooked(false);
-            }}
-          />
-        </div>
-
-        <div className="booking-field">
-          <label>CHECK-OUT</label>
-
-          <input
-            type="date"
-            value={checkOut}
-            min={checkIn}
-            onChange={(e) => {
-              setCheckOut(e.target.value);
-              setError("");
-              setBooked(false);
-            }}
-          />
-        </div>
-
-        <div className="booking-field full">
-
-          <label>GUESTS</label>
-
-          <select
-            value={guests}
-            onChange={(e) => {
-              setGuests(Number(e.target.value));
-              setError("");
-              setBooked(false);
-            }}
-          >
-            {Array.from(
-              {
-                length: maxGuests,
-              },
-              (_, index) => (
-                <option
-                  key={index + 1}
-                  value={index + 1}
-                >
-                  {index + 1}{" "}
-                  {index === 0
-                    ? "guest"
-                    : "guests"}
-                </option>
-              )
-            )}
-          </select>
-
-        </div>
-
-      </div>
-
-      {nights > 0 && (
-        <div className="price-summary">
-
-          <div>
-            <span>
-              ₹{price} × {nights} nights
-            </span>
-
-            <strong>
-              ₹{totalPrice}
-            </strong>
-          </div>
-
-          <div>
-            <span>Guests</span>
-
-            <strong>
-              {guests}
-            </strong>
-          </div>
-
-          <div className="total-price">
-            <span>Total</span>
-
-            <strong>
-              ₹{totalPrice}
-            </strong>
-          </div>
-
-        </div>
-      )}
-
-      {error && (
-        <p className="booking-error">
-          {error}
-        </p>
-      )}
-
-      {booked && (
-        <p className="booking-success">
-          Booking request submitted successfully!
-        </p>
-      )}
-
-      <button
-        className="reserve-button"
-        onClick={handleReserve}
-      >
-        Reserve
-      </button>
-
-      <p className="booking-note">
-        You won't be charged yet
+          ₹{pricePerNight.toLocaleString("en-IN")}
+        </strong>{" "}
+        / night
       </p>
 
-    </aside>
+      <form onSubmit={handleBooking}>
+        <label htmlFor="booking-check-in">
+          Check-in
+        </label>
+
+        <input
+          id="booking-check-in"
+          type="date"
+          value={checkIn}
+          min={today}
+          onChange={(event) => {
+            setCheckIn(event.target.value);
+
+            if (
+              checkOut &&
+              event.target.value &&
+              checkOut <= event.target.value
+            ) {
+              setCheckOut("");
+            }
+
+            setError("");
+            setSuccess("");
+          }}
+          required
+        />
+
+        <label htmlFor="booking-check-out">
+          Check-out
+        </label>
+
+        <input
+          id="booking-check-out"
+          type="date"
+          value={checkOut}
+          min={checkIn || today}
+          onChange={(event) => {
+            setCheckOut(event.target.value);
+            setError("");
+            setSuccess("");
+          }}
+          required
+        />
+
+        <label htmlFor="booking-guests">
+          Guests
+        </label>
+
+        <select
+          id="booking-guests"
+          value={guests}
+          onChange={(event) => {
+            setGuests(Number(event.target.value));
+            setError("");
+            setSuccess("");
+          }}
+        >
+          {Array.from(
+            { length: maxGuests },
+            (_, index) => index + 1
+          ).map((count) => (
+            <option key={count} value={count}>
+              {count} {count === 1 ? "guest" : "guests"}
+            </option>
+          ))}
+        </select>
+
+        {nights > 0 && (
+          <div className="booking-price-summary">
+            <p>
+              ₹{pricePerNight.toLocaleString("en-IN")} ×{" "}
+              {nights} {nights === 1 ? "night" : "nights"}
+            </p>
+
+            <h3>
+              Total: ₹{totalPrice.toLocaleString("en-IN")}
+            </h3>
+          </div>
+        )}
+
+        {error && (
+          <p className="booking-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        {success && (
+          <p className="booking-success" role="status">
+            {success}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          className="booking-button"
+          disabled={loading}
+        >
+          {loading ? "Creating booking..." : "Reserve"}
+        </button>
+      </form>
+    </section>
   );
 }
 

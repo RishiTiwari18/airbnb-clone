@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-
-import ImageGallery from "../components/ImageGallery";
-import HostInfo from "../components/HostInfo";
-import Amenities from "../components/Amenities";
+import { useParams, Link } from "react-router-dom";
 import BookingCard from "../components/BookingCard";
+
+const API_URL = "http://localhost:5000/api/properties";
 
 function PropertyDetails() {
   const { id } = useParams();
@@ -14,127 +12,117 @@ function PropertyDetails() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadProperty = async () => {
+    const fetchProperty = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          `http://localhost:5000/api/properties/${id}`
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            "Failed to fetch property"
-          );
-        }
-
+        const response = await fetch(`${API_URL}/${id}`);
         const data = await response.json();
 
-        setProperty(data);
-      } catch (error) {
-        console.error(error);
-        setError("Unable to load property");
+        if (!response.ok) {
+          throw new Error(data.message || "Unable to fetch property details");
+        }
+
+        const propertyData = data.property || data;
+
+        setProperty(propertyData);
+      } catch (err) {
+        setError(err.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
     };
 
-    loadProperty();
+    if (id) {
+      fetchProperty();
+    } else {
+      setError("Property ID is missing");
+      setLoading(false);
+    }
   }, [id]);
 
   if (loading) {
-    return (
-      <main className="loading-container">
-        <h2>Loading property...</h2>
-      </main>
-    );
+    return <p>Loading property details...</p>;
   }
 
   if (error) {
     return (
-      <main className="error-container">
-        <h2>Something went wrong</h2>
+      <div>
         <p>{error}</p>
-
-        <Link to="/">
-          Go back to home
-        </Link>
-      </main>
+        <Link to="/">Go back to home</Link>
+      </div>
     );
   }
 
   if (!property) {
-    return (
-      <main className="property-not-found">
-        <h2>Property not found</h2>
-
-        <Link to="/">
-          Go back to home
-        </Link>
-      </main>
-    );
+    return <p>Property not found.</p>;
   }
 
-  return (
-    <main className="property-details-page">
-      <div className="details-header">
-        <Link to="/" className="back-button">
-          ← Back
-        </Link>
+  const image =
+    property.image ||
+    property.imageUrl ||
+    (Array.isArray(property.images) ? property.images[0] : "");
 
-        <div className="details-actions">
-          <button>Share</button>
-          <button>Save</button>
+  const title = property.title || property.name || "Untitled Property";
+
+  const location =
+    property.location ||
+    property.city ||
+    property.address ||
+    "Location not available";
+
+  const price = property.price ?? property.pricePerNight;
+
+  return (
+    <div className="property-details-page">
+      <Link to="/">← Back to home</Link>
+
+      <div className="property-details-layout">
+        <div className="property-details-content">
+          {image && (
+            <img
+              src={image}
+              alt={title}
+              className="property-details-image"
+            />
+          )}
+
+          <h1>{title}</h1>
+
+          <p>{location}</p>
+
+          {property.description && <p>{property.description}</p>}
+
+          {price !== undefined && (
+            <p>
+              <strong>₹{price}</strong> per night
+            </p>
+          )}
+
+          {property.maxGuests !== undefined && (
+            <p>Maximum guests: {property.maxGuests}</p>
+          )}
+
+          {Array.isArray(property.amenities) &&
+            property.amenities.length > 0 && (
+              <div>
+                <h2>Amenities</h2>
+
+                <ul>
+                  {property.amenities.map((amenity, index) => (
+                    <li key={`${amenity}-${index}`}>{amenity}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+        </div>
+
+        <div className="property-details-booking">
+          <BookingCard property={property} />
         </div>
       </div>
-
-      <h1 className="details-title">
-        {property.location}
-      </h1>
-
-      <div className="details-rating">
-        <span>★ {property.rating}</span>
-        <span>·</span>
-        <span>{property.reviews} reviews</span>
-      </div>
-
-      <ImageGallery
-        images={property.images}
-        location={property.location}
-      />
-
-      <div className="details-layout">
-        <section className="details-main">
-          <HostInfo
-            location={property.location}
-            maxGuests={property.maxGuests}
-            bedrooms={property.bedrooms}
-            beds={property.beds}
-            bathrooms={property.bathrooms}
-            host={property.host}
-            hostExperience={property.hostExperience}
-          />
-
-          <div className="details-section">
-            <h2>About this place</h2>
-
-            <p>{property.description}</p>
-          </div>
-
-          <Amenities
-            amenities={property.amenities}
-          />
-        </section>
-
-        <BookingCard
-          price={property.price}
-          rating={property.rating}
-          reviews={property.reviews}
-          maxGuests={property.maxGuests}
-        />
-      </div>
-    </main>
+    </div>
   );
 }
 
