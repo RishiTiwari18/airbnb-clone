@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import BookingCard from "../components/BookingCard";
+import ReviewForm from "../components/ReviewForm";
+import ReviewList from "../components/ReviewList";
 
 const API_URL = "http://localhost:5000/api/properties";
 
@@ -10,6 +12,7 @@ function PropertyDetails() {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -21,7 +24,9 @@ function PropertyDetails() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Unable to fetch property details");
+          throw new Error(
+            data.message || "Unable to fetch property details"
+          );
         }
 
         const propertyData = data.property || data;
@@ -92,6 +97,13 @@ function PropertyDetails() {
 
           <p>{location}</p>
 
+          <p>
+            <strong>
+              ★ {Number(property.rating || 0).toFixed(1)}
+            </strong>{" "}
+            ({property.reviews || 0} reviews)
+          </p>
+
           {property.description && <p>{property.description}</p>}
 
           {price !== undefined && (
@@ -104,9 +116,31 @@ function PropertyDetails() {
             <p>Maximum guests: {property.maxGuests}</p>
           )}
 
+          {property.bedrooms !== undefined && (
+            <p>Bedrooms: {property.bedrooms}</p>
+          )}
+
+          {property.bathrooms !== undefined && (
+            <p>Bathrooms: {property.bathrooms}</p>
+          )}
+
+          {property.beds !== undefined && (
+            <p>Beds: {property.beds}</p>
+          )}
+
+          {property.host && (
+            <div className="property-host">
+              <h2>Hosted by {property.host}</h2>
+
+              {property.hostExperience && (
+                <p>{property.hostExperience}</p>
+              )}
+            </div>
+          )}
+
           {Array.isArray(property.amenities) &&
             property.amenities.length > 0 && (
-              <div>
+              <div className="property-amenities">
                 <h2>Amenities</h2>
 
                 <ul>
@@ -122,6 +156,20 @@ function PropertyDetails() {
           <BookingCard property={property} />
         </div>
       </div>
+
+      <section className="property-reviews">
+        <ReviewList
+          propertyId={id}
+          refreshKey={reviewRefreshKey}
+        />
+
+        <ReviewForm
+          propertyId={id}
+          onReviewSubmitted={() =>
+            setReviewRefreshKey((previous) => previous + 1)
+          }
+        />
+      </section>
     </div>
   );
 }

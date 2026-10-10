@@ -3706,3 +3706,75 @@ main p {
     flex-direction: column;
   }
 }
+
+.property-reviews {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.review-form,
+.review-list {
+  margin-bottom: 28px;
+}
+
+.review-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+}
+
+.review-form select,
+.review-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.review-form textarea {
+  resize: vertical;
+}
+
+.review-form button {
+  width: fit-content;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #ff385c;
+  color: white;
+  font-weight: 600;
+}
+
+.review-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.review-error {
+  color: #dc2626;
+}
+
+.review-success {
+  color: #15803d;
+}
+
+.review-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.review-item h4 {
+  margin-bottom: 6px;
+}
+
+.review-item p {
+  margin: 8px 0;
+}
+
+.review-item p:nth-of-type(1) {
+  color: #f59e0b;
+}
