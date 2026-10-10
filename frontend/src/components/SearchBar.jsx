@@ -1,168 +1,186 @@
 import { useState } from "react";
+import "./SearchBar.css";
 
-function SearchBar({ onSearch }) {
-  const [destination, setDestination] = useState("");
-  const [guests, setGuests] = useState(0);
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [searched, setSearched] = useState(false);
+const initialFilters = {
+  destination: "",
+  checkIn: "",
+  checkOut: "",
+  guests: "",
+  maxPrice: "",
+  bedrooms: "",
+};
 
-  const handleSearch = () => {
-    if (!destination.trim()) {
-      alert("Please enter a destination");
+function SearchBar({ onSearch, onReset }) {
+  const [filters, setFilters] = useState(initialFilters);
+  const [error, setError] = useState("");
+
+  const today = new Date();
+  const todayString = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, "0"),
+    String(today.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFilters((previousFilters) => ({
+      ...previousFilters,
+      [name]: value,
+    }));
+
+    setError("");
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (
+      filters.checkIn &&
+      filters.checkOut &&
+      filters.checkOut <= filters.checkIn
+    ) {
+      setError("Check-out date must be after check-in date.");
       return;
     }
 
-    if (!checkIn) {
-      alert("Please select check-in date");
-      return;
+    setError("");
+    onSearch(filters);
+  };
+
+  const handleReset = () => {
+    setFilters({ ...initialFilters });
+    setError("");
+
+    if (onReset) {
+      onReset();
+    } else {
+      onSearch({ ...initialFilters });
     }
-
-    if (!checkOut) {
-      alert("Please select check-out date");
-      return;
-    }
-
-    onSearch({
-      destination: destination.trim(),
-      checkIn,
-      checkOut,
-      guests,
-    });
-
-    setSearched(true);
   };
 
   return (
-    <div className="search-container">
+    <section className="stay-search">
+      <div className="stay-search-heading">
+        <div>
+          <p className="stay-search-eyebrow">FIND YOUR NEXT STAY</p>
 
-      <div className="search-bar">
+          <h2>Where do you want to go?</h2>
 
-        <div className="search-item destination-input">
-          <span>Where</span>
-
-          <input
-            type="text"
-            placeholder="Search destinations"
-            value={destination}
-            onChange={(e) =>
-              setDestination(e.target.value)
-            }
-          />
-        </div>
-
-        <div className="search-item">
-          <span>Check in</span>
-
-          <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => {
-              const selectedDate = e.target.value;
-
-              setCheckIn(selectedDate);
-
-              if (
-                checkOut &&
-                selectedDate > checkOut
-              ) {
-                setCheckOut("");
-              }
-            }}
-          />
-        </div>
-
-        <div className="search-item">
-          <span>Check out</span>
-
-          <input
-            type="date"
-            value={checkOut}
-            min={checkIn}
-            onChange={(e) =>
-              setCheckOut(e.target.value)
-            }
-          />
-        </div>
-
-        <div className="search-item">
-          <span>Who</span>
-
-          <p>
-            {guests === 0
-              ? "Add guests"
-              : `${guests} guest${
-                  guests > 1 ? "s" : ""
-                }`}
+          <p className="stay-search-subtitle">
+            Discover a place that feels like home.
           </p>
         </div>
-
-        <button
-          className="search-button"
-          onClick={handleSearch}
-        >
-          🔍
-        </button>
-
       </div>
 
-      <div className="destination-options">
+      <form className="stay-search-form" onSubmit={handleSubmit}>
+        <div className="stay-search-fields">
+          <div className="stay-search-field destination-field">
+            <label htmlFor="destination">Destination</label>
 
-        <button
-          onClick={() =>
-            setDestination("Goa, India")
-          }
-        >
-          Goa
-        </button>
+            <input
+              id="destination"
+              type="text"
+              name="destination"
+              placeholder="Search cities or locations"
+              value={filters.destination}
+              onChange={handleChange}
+            />
+          </div>
 
-        <button
-          onClick={() =>
-            setDestination("Manali, India")
-          }
-        >
-          Manali
-        </button>
+          <div className="stay-search-field">
+            <label htmlFor="checkIn">Check-in</label>
 
-        <button
-          onClick={() =>
-            setDestination("Jaipur, India")
-          }
-        >
-          Jaipur
-        </button>
+            <input
+              id="checkIn"
+              type="date"
+              name="checkIn"
+              min={todayString}
+              value={filters.checkIn}
+              onChange={handleChange}
+            />
+          </div>
 
-      </div>
+          <div className="stay-search-field">
+            <label htmlFor="checkOut">Check-out</label>
 
-      <div className="guest-options">
+            <input
+              id="checkOut"
+              type="date"
+              name="checkOut"
+              min={filters.checkIn || todayString}
+              value={filters.checkOut}
+              onChange={handleChange}
+            />
+          </div>
 
-        <span>Guests</span>
+          <div className="stay-search-field">
+            <label htmlFor="guests">Guests</label>
 
-        <button
-          onClick={() => setGuests(guests - 1)}
-          disabled={guests === 0}
-        >
-          −
-        </button>
+            <input
+              id="guests"
+              type="number"
+              name="guests"
+              min="1"
+              max="100"
+              placeholder="Number of guests"
+              value={filters.guests}
+              onChange={handleChange}
+            />
+          </div>
 
-        <strong>{guests}</strong>
+          <div className="stay-search-field">
+            <label htmlFor="maxPrice">Maximum price/night (₹)</label>
 
-        <button
-          onClick={() => setGuests(guests + 1)}
-          disabled={guests === 10}
-        >
-          +
-        </button>
+            <input
+              id="maxPrice"
+              type="number"
+              name="maxPrice"
+              min="0"
+              max="10000000"
+              placeholder="Your budget"
+              value={filters.maxPrice}
+              onChange={handleChange}
+            />
+          </div>
 
-      </div>
+          <div className="stay-search-field">
+            <label htmlFor="bedrooms">Minimum bedrooms</label>
 
-      {searched && (
-        <p className="search-message">
-          Search completed
-        </p>
-      )}
+            <select
+              id="bedrooms"
+              name="bedrooms"
+              value={filters.bedrooms}
+              onChange={handleChange}
+            >
+              <option value="">Any</option>
+              <option value="1">1+ bedroom</option>
+              <option value="2">2+ bedrooms</option>
+              <option value="3">3+ bedrooms</option>
+              <option value="4">4+ bedrooms</option>
+              <option value="5">5+ bedrooms</option>
+            </select>
+          </div>
+        </div>
 
-    </div>
+        {error && (
+          <p className="stay-search-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        <div className="stay-search-actions">
+          <button type="button" onClick={handleReset}>
+            Clear filters
+          </button>
+
+          <button type="submit" className="stay-search-submit">
+            <span aria-hidden="true">⌕</span>
+            Search stays
+          </button>
+        </div>
+      </form>
+    </section>
   );
 }
 

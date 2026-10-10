@@ -23,19 +23,13 @@ function Navbar() {
     setMenuOpen(false);
   };
 
-  const isActive = (path) =>
-    location.pathname === path;
+  const isActive = (path) => location.pathname === path;
 
   return (
     <header className="navbar-wrapper">
       <nav className="navbar">
-        <Link
-          to="/"
-          className="navbar-logo"
-          onClick={closeMenu}
-        >
+        <Link to="/" className="navbar-logo" onClick={closeMenu}>
           <span className="navbar-logo-icon">⌂</span>
-
           <span>
             Stay<span className="navbar-logo-accent">Scape</span>
           </span>
@@ -44,27 +38,17 @@ function Navbar() {
         <button
           type="button"
           className="navbar-menu-toggle"
-          aria-label={
-            menuOpen
-              ? "Close navigation menu"
-              : "Open navigation menu"
-          }
+          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? "✕" : "☰"}
         </button>
 
-        <div
-          className={`navbar-links ${
-            menuOpen ? "navbar-links-open" : ""
-          }`}
-        >
+        <div className={`navbar-links ${menuOpen ? "navbar-links-open" : ""}`}>
           <Link
             to="/"
-            className={`navbar-link ${
-              isActive("/") ? "navbar-link-active" : ""
-            }`}
+            className={`navbar-link ${isActive("/") ? "navbar-link-active" : ""}`}
             onClick={closeMenu}
           >
             Explore
@@ -75,24 +59,15 @@ function Navbar() {
               <>
                 <Link
                   to="/wishlist"
-                  className={`navbar-link ${
-                    isActive("/wishlist")
-                      ? "navbar-link-active"
-                      : ""
-                  }`}
+                  className={`navbar-link ${isActive("/wishlist") ? "navbar-link-active" : ""}`}
                   onClick={closeMenu}
                 >
-                  <span className="navbar-heart">♡</span>{" "}
-                  Wishlist
+                  <span className="navbar-heart">♡</span> Wishlist
                 </Link>
 
                 <Link
                   to="/my-bookings"
-                  className={`navbar-link ${
-                    isActive("/my-bookings")
-                      ? "navbar-link-active"
-                      : ""
-                  }`}
+                  className={`navbar-link ${isActive("/my-bookings") ? "navbar-link-active" : ""}`}
                   onClick={closeMenu}
                 >
                   My Bookings
@@ -100,21 +75,25 @@ function Navbar() {
 
                 <Link
                   to="/profile"
-                  className={`navbar-link ${
-                    isActive("/profile")
-                      ? "navbar-link-active"
-                      : ""
-                  }`}
+                  className={`navbar-link ${isActive("/profile") ? "navbar-link-active" : ""}`}
                   onClick={closeMenu}
                 >
                   Profile
                 </Link>
 
+                <Link
+                  to="/host-dashboard"
+                  className={`navbar-link navbar-host-link ${
+                    isActive("/host-dashboard") ? "navbar-link-active" : ""
+                  }`}
+                  onClick={closeMenu}
+                >
+                  <span aria-hidden="true">⌂</span> Host Dashboard
+                </Link>
+
                 <div className="navbar-user">
                   <span className="navbar-avatar">
-                    {(user.name || "U")
-                      .charAt(0)
-                      .toUpperCase()}
+                    {(user.name || "U").charAt(0).toUpperCase()}
                   </span>
 
                   <span className="navbar-username">
@@ -134,11 +113,7 @@ function Navbar() {
               <div className="navbar-auth">
                 <Link
                   to="/login"
-                  className={`navbar-link ${
-                    isActive("/login")
-                      ? "navbar-link-active"
-                      : ""
-                  }`}
+                  className={`navbar-link ${isActive("/login") ? "navbar-link-active" : ""}`}
                   onClick={closeMenu}
                 >
                   Log in

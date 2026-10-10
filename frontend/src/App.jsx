@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
 import MyBookings from "./pages/MyBookings";
+import HostDashboard from "./pages/HostDashboard";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -61,6 +62,15 @@ function App() {
           element={
             <ProtectedRoute>
               <MyBookings />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/host-dashboard"
+          element={
+            <ProtectedRoute>
+              <HostDashboard />
             </ProtectedRoute>
           }
         />

@@ -1,315 +1,180 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-
+import { useMemo, useState } from "react";
 import SearchBar from "../components/SearchBar";
-import PropertyCard from "../components/PropertyCard";
 import CategoryBar from "../components/CategoryBar";
+import PropertyCard from "../components/PropertyCard";
+import  properties  from "../data/properties";
+import "./Home.css";
+
+const initialFilters = {
+  destination: "",
+  checkIn: "",
+  checkOut: "",
+  guests: "",
+  maxPrice: "",
+  bedrooms: "",
+};
 
 function Home() {
-  const [propertyData, setPropertyData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [searchFilters, setSearchFilters] = useState(initialFilters);
 
-  const [searchData, setSearchData] = useState({
-    destination: "",
-    checkIn: "",
-    checkOut: "",
-    guests: 0,
-  });
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const [selectedCategory, setSelectedCategory] =
-    useState("All");
+  const categories = useMemo(() => {
+    const uniqueCategories = [
+      ...new Set(
+        properties
+          .map((property) => property.category)
+          .filter(Boolean)
+      ),
+    ];
 
-  useEffect(() => {
-    const loadProperties = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await fetch(
-          "http://localhost:5000/api/properties"
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch properties");
-        }
-
-        const data = await response.json();
-
-        const properties = Array.isArray(data)
-          ? data
-          : Array.isArray(data.properties)
-            ? data.properties
-            : [];
-
-        setPropertyData(properties);
-      } catch (error) {
-        console.error("Properties loading error:", error);
-
-        setError(
-          "Unable to load properties. Please check whether the backend server is running."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProperties();
+    return ["All", ...uniqueCategories];
   }, []);
 
-  const filteredProperties = propertyData.filter(
-    (property) => {
-      const location = property.location || "";
+  const filteredProperties = useMemo(() => {
+    return properties.filter((property) => {
+      const destination = searchFilters.destination
+        .trim()
+        .toLowerCase();
 
-      const destinationMatch =
-        !searchData.destination ||
-        location
-          .toLowerCase()
-          .includes(searchData.destination.toLowerCase());
+      const location = (property.location || "").toLowerCase();
 
-      const guestsMatch =
-        !searchData.guests ||
-        (property.maxGuests || 0) >= Number(searchData.guests);
+      const description = (property.description || "").toLowerCase();
 
-      const categoryMatch =
+      const matchesDestination =
+        !destination ||
+        location.includes(destination) ||
+        description.includes(destination);
+
+      const guests = Number(searchFilters.guests);
+
+      const matchesGuests =
+        !searchFilters.guests ||
+        Number(property.maxGuests) >= guests;
+
+      const maxPrice = Number(searchFilters.maxPrice);
+
+      const matchesPrice =
+        !searchFilters.maxPrice ||
+        Number(property.price) <= maxPrice;
+
+      const bedrooms = Number(searchFilters.bedrooms);
+
+      const matchesBedrooms =
+        !searchFilters.bedrooms ||
+        Number(property.bedrooms) >= bedrooms;
+
+      const matchesCategory =
         selectedCategory === "All" ||
         property.category === selectedCategory;
 
       return (
-        destinationMatch &&
-        guestsMatch &&
-        categoryMatch
+        matchesDestination &&
+        matchesGuests &&
+        matchesPrice &&
+        matchesBedrooms &&
+        matchesCategory
       );
-    }
-  );
+    });
+  }, [searchFilters, selectedCategory]);
+
+  const handleSearch = (filters) => {
+    setSearchFilters(filters);
+  };
+
+  const handleReset = () => {
+    setSearchFilters({ ...initialFilters });
+    setSelectedCategory("All");
+  };
 
   return (
     <main className="home-page">
-      <section className="hero-section">
-        <div className="hero-content">
-          <span className="hero-badge">
-            ✨ YOUR NEXT ADVENTURE STARTS HERE
+      <section className="home-hero">
+        <div className="home-hero-content">
+          <span className="home-hero-badge">
+            YOUR NEXT ADVENTURE STARTS HERE
           </span>
 
           <h1>
             Find your place
             <br />
-            <span>in the world.</span>
+            <span>away from home.</span>
           </h1>
 
-          <p className="hero-description">
-            Discover beautiful stays, explore new destinations,
-            and make memories that last forever.
+          <p>
+            Explore unique stays, discover new destinations,
+            and find a space that fits your journey.
           </p>
-
-          <div className="hero-search">
-            <SearchBar onSearch={setSearchData} />
-          </div>
-
-          <div className="hero-highlights">
-            <div className="hero-highlight">
-              <span className="highlight-icon">🏡</span>
-              <div>
-                <strong>Unique stays</strong>
-                <span>Find your perfect place</span>
-              </div>
-            </div>
-
-            <div className="hero-highlight">
-              <span className="highlight-icon">📍</span>
-              <div>
-                <strong>Amazing places</strong>
-                <span>Explore new destinations</span>
-              </div>
-            </div>
-
-            <div className="hero-highlight">
-              <span className="highlight-icon">💖</span>
-              <div>
-                <strong>Made for you</strong>
-                <span>Save your favourites</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="hero-visual">
-          <div className="hero-image-main">
-            <img
-              src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1000&q=85"
-              alt="Beautiful luxury vacation villa"
-            />
-
-            <div className="hero-image-overlay">
-              <span className="hero-location-label">
-                ✦ YOUR NEXT GETAWAY
-              </span>
-
-              <h2>Somewhere beautiful.</h2>
-
-              <p>Your journey begins with a stay.</p>
-            </div>
-          </div>
-
-          <div className="hero-floating-card">
-            <span className="floating-card-icon">⭐</span>
-
-            <div>
-              <strong>Find your happy place</strong>
-              <p>Discover stays worth remembering</p>
-            </div>
-          </div>
-
-          <div className="hero-decoration hero-decoration-one"></div>
-          <div className="hero-decoration hero-decoration-two"></div>
         </div>
       </section>
 
-      <section className="explore-section">
-        <div className="section-heading">
-          <div>
-            <span className="section-eyebrow">
-              EXPLORE THE POSSIBILITIES
-            </span>
-
-            <h2>Find a stay that feels like you.</h2>
-
-            <p>
-              From relaxing beach escapes to peaceful mountain
-              retreats, discover your next favourite place.
-            </p>
-          </div>
-        </div>
-
-        <CategoryBar
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+      <div className="home-content">
+        <SearchBar
+          onSearch={handleSearch}
+          onReset={handleReset}
         />
 
-        <div className="properties-heading">
-          <div>
-            <h2>
-              {selectedCategory === "All"
-                ? "Places you might love"
-                : `${selectedCategory} stays`}
-            </h2>
+        <CategoryBar
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
 
-            {!loading && !error && (
+        <section className="home-results">
+          <div className="home-results-heading">
+            <div>
+              <h2>Discover stays</h2>
+
               <p>
                 {filteredProperties.length}{" "}
                 {filteredProperties.length === 1
-                  ? "stay"
-                  : "stays"}{" "}
-                to explore
+                  ? "property"
+                  : "properties"}{" "}
+                found
               </p>
-            )}
-          </div>
-
-          {selectedCategory !== "All" && (
-            <button
-              type="button"
-              className="clear-filter-button"
-              onClick={() => setSelectedCategory("All")}
-            >
-              Clear filter ✕
-            </button>
-          )}
-        </div>
-
-        {loading && (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-
-            <h3>Finding beautiful places...</h3>
-
-            <p>Your next favourite stay is just around the corner.</p>
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="error-container">
-            <div className="state-icon">🏡</div>
-
-            <h2>We couldn't load the stays</h2>
-
-            <p>{error}</p>
+            </div>
 
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              className="home-reset-button"
+              onClick={handleReset}
             >
-              Try Again
+              Reset all
             </button>
           </div>
-        )}
 
-        {!loading &&
-          !error &&
-          filteredProperties.length === 0 && (
-            <div className="empty-container">
-              <div className="state-icon">🔎</div>
+          {filteredProperties.length > 0 ? (
+            <div className="home-property-grid">
+              {filteredProperties.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="home-empty-state">
+              <div className="home-empty-icon" aria-hidden="true">
+                ⌕
+              </div>
 
-              <h2>No stays found</h2>
+              <h3>No stays found</h3>
 
               <p>
-                Try another destination or select a different
-                category to discover more places.
+                Try changing your destination, budget, guests,
+                bedrooms, or category.
               </p>
 
               <button
                 type="button"
-                onClick={() => {
-                  setSearchData({
-                    destination: "",
-                    checkIn: "",
-                    checkOut: "",
-                    guests: 0,
-                  });
-
-                  setSelectedCategory("All");
-                }}
+                onClick={handleReset}
               >
-                Explore all stays
+                Clear all filters
               </button>
             </div>
           )}
-
-        {!loading &&
-          !error &&
-          filteredProperties.length > 0 && (
-            <section className="property-list">
-              {filteredProperties.map((property) => (
-                <PropertyCard
-                  key={property._id || property.id}
-                  property={property}
-                />
-              ))}
-            </section>
-          )}
-      </section>
-
-      <section className="home-cta">
-        <div className="home-cta-content">
-          <span>YOUR NEXT CHAPTER STARTS HERE</span>
-
-          <h2>
-            The world is full of
-            <br />
-            places to fall in love with.
-          </h2>
-
-          <p>
-            Find a stay that makes every journey special.
-            Your next adventure is waiting.
-          </p>
-
-          <Link to="/register" className="home-cta-button">
-            Start exploring <span>→</span>
-          </Link>
-        </div>
-
-        <div className="home-cta-decoration">✦</div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }
