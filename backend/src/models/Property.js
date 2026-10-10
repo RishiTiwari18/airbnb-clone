@@ -1,80 +1,103 @@
 const mongoose = require("mongoose");
 
-const propertySchema = new mongoose.Schema({
-  location: {
-    type: String,
-    required: true,
-  },
+const propertySchema = new mongoose.Schema(
+  {
+    location: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  price: {
-    type: Number,
-    required: true,
-  },
+    price: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
 
-  rating: {
-    type: Number,
-    required: true,
-  },
+    rating: {
+      type: Number,
+      default: 0,
+    },
 
-  reviews: {
-    type: Number,
-    required: true,
-  },
+    reviews: {
+      type: Number,
+      default: 0,
+    },
 
-  maxGuests: {
-    type: Number,
-    required: true,
-  },
+    maxGuests: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
 
-  bedrooms: {
-    type: Number,
-    required: true,
-  },
+    bedrooms: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
 
-  bathrooms: {
-    type: Number,
-    required: true,
-  },
+    bathrooms: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
 
-  beds: {
-    type: Number,
-    required: true,
-  },
+    beds: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
 
-  category: {
-    type: String,
-    required: true,
-  },
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  host: {
-    type: String,
-    required: true,
-  },
+    host: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  hostExperience: {
-    type: String,
-    required: true,
-  },
+    hostId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+      index: true,
+    },
 
-  description: {
-    type: String,
-    required: true,
-  },
+    hostExperience: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  images: {
-    type: [String],
-    required: true,
-  },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  amenities: {
-    type: [String],
-    required: true,
-  },
-});
+    images: {
+      type: [String],
+      required: true,
+      validate: {
+        validator: (images) => images.length > 0,
+        message: "At least one property image is required",
+      },
+    },
 
-const Property = mongoose.model(
-  "Property",
-  propertySchema
+    amenities: {
+      type: [String],
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
+
+const Property = mongoose.model("Property", propertySchema);
 
 module.exports = Property;

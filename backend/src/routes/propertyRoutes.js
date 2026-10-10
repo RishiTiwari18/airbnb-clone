@@ -3,21 +3,26 @@ const express = require("express");
 const {
   getProperties,
   getPropertyById,
+  getMyProperties,
   createProperty,
   updateProperty,
   deleteProperty,
 } = require("../controllers/propertyController");
 
+const protect = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
 router.get("/", getProperties);
 
+router.get("/my-listings", protect, getMyProperties);
+
 router.get("/:id", getPropertyById);
 
-router.post("/", createProperty);
+router.post("/", protect, createProperty);
 
-router.put("/:id", updateProperty);
+router.put("/:id", protect, updateProperty);
 
-router.delete("/:id", deleteProperty);
+router.delete("/:id", protect, deleteProperty);
 
 module.exports = router;
