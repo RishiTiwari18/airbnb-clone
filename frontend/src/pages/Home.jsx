@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SearchBar from "../components/SearchBar";
 import CategoryBar from "../components/CategoryBar";
 import PropertyCard from "../components/PropertyCard";
-import  properties  from "../data/properties";
 import "./Home.css";
 
 const initialFilters = {
@@ -14,10 +13,64 @@ const initialFilters = {
   bedrooms: "",
 };
 
-function Home() {
-  const [searchFilters, setSearchFilters] = useState(initialFilters);
+const API_URL = "http://localhost:5000/api/properties";
 
+function Home() {
+  const [properties, setProperties] = useState([]);
+  const [searchFilters, setSearchFilters] = useState(initialFilters);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadProperties = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(API_URL, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load properties.");
+        }
+
+        const data = await response.json();
+
+        const propertyList = Array.isArray(data)
+          ? data
+          : Array.isArray(data.properties)
+            ? data.properties
+            : Array.isArray(data.data)
+              ? data.data
+              : null;
+
+        if (!propertyList) {
+          throw new Error("Unexpected response from the server.");
+        }
+
+        setProperties(propertyList);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Property loading error:", err);
+          setError(
+            "Unable to load properties. Please check that the backend server is running."
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProperties();
+
+    return () => controller.abort();
+  }, []);
 
   const categories = useMemo(() => {
     const uniqueCategories = [
@@ -29,7 +82,7 @@ function Home() {
     ];
 
     return ["All", ...uniqueCategories];
-  }, []);
+  }, [properties]);
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
@@ -38,7 +91,6 @@ function Home() {
         .toLowerCase();
 
       const location = (property.location || "").toLowerCase();
-
       const description = (property.description || "").toLowerCase();
 
       const matchesDestination =
@@ -76,7 +128,7 @@ function Home() {
         matchesCategory
       );
     });
-  }, [searchFilters, selectedCategory]);
+  }, [properties, searchFilters, selectedCategory]);
 
   const handleSearch = (filters) => {
     setSearchFilters(filters);
@@ -114,66 +166,82 @@ function Home() {
           onReset={handleReset}
         />
 
-        <CategoryBar
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
-
-        <section className="home-results">
-          <div className="home-results-heading">
-            <div>
-              <h2>Discover stays</h2>
-
-              <p>
-                {filteredProperties.length}{" "}
-                {filteredProperties.length === 1
-                  ? "property"
-                  : "properties"}{" "}
-                found
-              </p>
-            </div>
-
+        {loading ? (
+          <p role="status">Loading properties...</p>
+        ) : error ? (
+          <div className="home-empty-state">
+            <h3>Unable to load stays</h3>
+            <p>{error}</p>
             <button
               type="button"
-              className="home-reset-button"
-              onClick={handleReset}
+              onClick={() => window.location.reload()}
             >
-              Reset all
+              Try again
             </button>
           </div>
+        ) : (
+          <>
+            <CategoryBar
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+            />
 
-          {filteredProperties.length > 0 ? (
-            <div className="home-property-grid">
-              {filteredProperties.map((property) => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="home-empty-state">
-              <div className="home-empty-icon" aria-hidden="true">
-                ⌕
+            <section className="home-results">
+              <div className="home-results-heading">
+                <div>
+                  <h2>Discover stays</h2>
+                  <p>
+                    {filteredProperties.length}{" "}
+                    {filteredProperties.length === 1
+                      ? "property"
+                      : "properties"}{" "}
+                    found
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="home-reset-button"
+                  onClick={handleReset}
+                >
+                  Reset all
+                </button>
               </div>
 
-              <h3>No stays found</h3>
+              {filteredProperties.length > 0 ? (
+                <div className="home-property-grid">
+                  {filteredProperties.map((property) => (
+                    <PropertyCard
+                      key={property._id || property.id}
+                      property={property}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="home-empty-state">
+                  <div className="home-empty-icon" aria-hidden="true">
+                    ⌕
+                  </div>
 
-              <p>
-                Try changing your destination, budget, guests,
-                bedrooms, or category.
-              </p>
+                  <h3>No stays found</h3>
 
-              <button
-                type="button"
-                onClick={handleReset}
-              >
-                Clear all filters
-              </button>
-            </div>
-          )}
-        </section>
+                  <p>
+                    Try changing your destination, budget, guests,
+                    bedrooms, or category.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              )}
+            </section>
+          </>
+        )}
       </div>
     </main>
   );
