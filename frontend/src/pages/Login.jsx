@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
@@ -14,6 +15,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,11 +77,57 @@ function Login() {
       navigate("/");
     } catch (error) {
       setError(
-        error.message ||
-          "Something went wrong. Please try again."
+        error.message || "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError("");
+
+    if (!credentialResponse?.credential) {
+      setError("Google sign-in did not return a valid credential.");
+      return;
+    }
+
+    setGoogleLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/google",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            credential: credentialResponse.credential,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Google sign-in failed. Please try again."
+        );
+      }
+
+      if (!data.user || !data.token) {
+        throw new Error("Invalid response from the server.");
+      }
+
+      login(data.user, data.token);
+      navigate("/");
+    } catch (error) {
+      setError(
+        error.message || "Unable to sign in with Google."
+      );
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -152,6 +200,37 @@ function Login() {
               </p>
             </div>
 
+            <div className="google-login-container">
+              {googleLoading ? (
+                <button
+                  type="button"
+                  className="login-submit-button"
+                  disabled
+                >
+                  <span className="login-button-spinner"></span>
+                  Signing in with Google...
+                </button>
+              ) : (
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => {
+                    setError(
+                      "Google sign-in was unsuccessful. Please try again."
+                    );
+                  }}
+                  text="continue_with"
+                  shape="rectangular"
+                  theme="outline"
+                  size="large"
+                  width="320"
+                />
+              )}
+            </div>
+
+            <div className="login-divider">
+              <span>OR CONTINUE WITH EMAIL</span>
+            </div>
+
             <form
               className="login-form"
               onSubmit={handleSubmit}
@@ -162,9 +241,7 @@ function Login() {
                 </label>
 
                 <div className="login-input-wrapper">
-                  <span className="login-input-icon">
-                    ✉
-                  </span>
+                  <span className="login-input-icon">✉</span>
 
                   <input
                     id="login-email"
@@ -187,9 +264,7 @@ function Login() {
                 </div>
 
                 <div className="login-input-wrapper">
-                  <span className="login-input-icon">
-                    ♙
-                  </span>
+                  <span className="login-input-icon">♙</span>
 
                   <input
                     id="login-password"
@@ -209,9 +284,7 @@ function Login() {
                       setShowPassword((previous) => !previous)
                     }
                     aria-label={
-                      showPassword
-                        ? "Hide password"
-                        : "Show password"
+                      showPassword ? "Hide password" : "Show password"
                     }
                   >
                     {showPassword ? "Hide" : "Show"}
@@ -220,10 +293,7 @@ function Login() {
               </div>
 
               {error && (
-                <div
-                  className="login-error"
-                  role="alert"
-                >
+                <div className="login-error" role="alert">
                   <span>!</span>
                   <p>{error}</p>
                 </div>
@@ -232,7 +302,7 @@ function Login() {
               <button
                 type="submit"
                 className="login-submit-button"
-                disabled={loading}
+                disabled={loading || googleLoading}
               >
                 {loading ? (
                   <>
@@ -247,10 +317,6 @@ function Login() {
                 )}
               </button>
             </form>
-
-            <div className="login-divider">
-              <span>YOUR NEXT CHAPTER STARTS HERE</span>
-            </div>
 
             <div className="login-register-prompt">
               <p>New to StayScape?</p>

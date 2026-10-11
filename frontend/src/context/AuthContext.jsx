@@ -5,59 +5,65 @@ import {
   useState,
 } from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+
+  const [token, setToken] = useState(() =>
+    localStorage.getItem("token")
+  );
+
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
-
-  const fetchCurrentUser = async () => {
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/auth/profile",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        localStorage.removeItem("token");
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (!token) {
         setUser(null);
+        setLoading(false);
         return;
       }
 
-      const data = await response.json();
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/auth/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      setUser(data.user);
-    } catch (error) {
-      console.error(error);
-      localStorage.removeItem("token");
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (!response.ok) {
+          localStorage.removeItem("token");
+          setToken(null);
+          setUser(null);
+          return;
+        }
 
-  useEffect(() => {
+        const data = await response.json();
+
+        setUser(data.user);
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchCurrentUser();
-  }, []);
+  }, [token]);
 
-  const login = (userData, token) => {
-    localStorage.setItem("token", token);
+  const login = (userData, newToken) => {
+    localStorage.setItem("token", newToken);
+    setToken(newToken);
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    setToken(null);
     setUser(null);
   };
 
@@ -77,5 +83,13 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error(
+      "useAuth must be used inside an AuthProvider"
+    );
+  }
+
+  return context;
 }
