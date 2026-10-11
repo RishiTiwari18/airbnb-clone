@@ -2,16 +2,16 @@ const express = require("express");
 
 const {
   createBooking,
+  verifyPayment,
   getMyBookings,
 } = require("../controllers/bookingController");
 
-const router = express.Router();
-
-// Replace this import with your project's existing JWT middleware.
 const authMiddleware = require("../middleware/authMiddleware");
 
-router.post("/", authMiddleware, createBooking);
+const router = express.Router();
 
+router.post("/", authMiddleware, createBooking);
+router.post("/verify-payment", authMiddleware, verifyPayment);
 router.get("/my", authMiddleware, getMyBookings);
 
 module.exports = router;
