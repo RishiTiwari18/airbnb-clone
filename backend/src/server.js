@@ -12,13 +12,19 @@ const reviewRoutes = require("./routes/reviewRoutes");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
 app.get("/", (req, res) => {
-  res.send("Airbnb Backend is running");
+  res.status(200).send("StayScape Backend is running");
 });
 
 app.use("/api/properties", propertyRoutes);
@@ -29,8 +35,8 @@ app.use("/api/reviews", reviewRoutes);
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`StayScape backend running on port ${PORT}`);
     });
   })
   .catch((error) => {
