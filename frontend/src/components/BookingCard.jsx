@@ -1,5 +1,30 @@
 import { useState } from "react";
-import { createBooking } from "../services/bookingService";
+import { createBooking, verifyPayment } from "../services/bookingService";
+
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    const existingScript = document.querySelector(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+    );
+
+    if (existingScript && window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const script = existingScript || document.createElement("script");
+
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+
+    if (!existingScript) {
+      document.body.appendChild(script);
+    }
+
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+  });
+}
 
 function BookingCard({ property }) {
   const [checkIn, setCheckIn] = useState("");
@@ -18,10 +43,7 @@ function BookingCard({ property }) {
     property.price ?? property.pricePerNight ?? 0
   );
 
-  const maxGuests = Math.max(
-    1,
-    Number(property.maxGuests) || 1
-  );
+  const maxGuests = Math.max(1, Number(property.maxGuests) || 1);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -41,9 +63,7 @@ function BookingCard({ property }) {
       return 0;
     }
 
-    return Math.round(
-      (end - start) / (24 * 60 * 60 * 1000)
-    );
+    return Math.round((end - start) / (24 * 60 * 60 * 1000));
   };
 
   const nights = getNights();
@@ -80,7 +100,9 @@ function BookingCard({ property }) {
       return;
     }
 
-    if (!property._id) {
+    const propertyId = property._id || property.id;
+
+    if (!propertyId) {
       setError("Property ID is missing. Please refresh the page.");
       return;
     }
@@ -88,25 +110,86 @@ function BookingCard({ property }) {
     setLoading(true);
 
     try {
-      await createBooking({
-        propertyId: property._id,
+      const scriptLoaded = await loadRazorpayScript();
+
+      if (!scriptLoaded || !window.Razorpay) {
+        throw new Error(
+          "Unable to load Razorpay Checkout. Check your internet connection."
+        );
+      }
+
+      const order = await createBooking({
+        propertyId,
         checkIn,
         checkOut,
         guests: Number(guests),
       });
 
-      setSuccess(
-        "Booking created successfully! Your booking has been saved."
-      );
+      if (!order.orderId || !order.keyId || !order.bookingId) {
+        throw new Error("Payment order details are missing from the server.");
+      }
 
-      setCheckIn("");
-      setCheckOut("");
-      setGuests(1);
+      const options = {
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Airbnb Clone",
+        description: `Booking for ${property.title || property.name || property.location || "property"}`,
+        order_id: order.orderId,
+
+        handler: async (paymentResponse) => {
+          setLoading(true);
+          setError("");
+          setSuccess("");
+
+          try {
+            await verifyPayment({
+              bookingId: order.bookingId,
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+            });
+
+            setSuccess(
+              "Payment verified successfully! Your booking is confirmed."
+            );
+
+            setCheckIn("");
+            setCheckOut("");
+            setGuests(1);
+          } catch (verificationError) {
+            setError(
+              `${verificationError.message} If money was deducted, check your booking status before trying again.`
+            );
+          } finally {
+            setLoading(false);
+          }
+        },
+
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+          },
+        },
+
+        theme: {
+          color: "#FF385C",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+
+      razorpay.on("payment.failed", (response) => {
+        setError(
+          response.error?.description ||
+            "Payment failed. Please try again."
+        );
+        setLoading(false);
+      });
+
+      razorpay.open();
     } catch (err) {
-      setError(
-        err.message || "Unable to create booking. Please try again."
-      );
-    } finally {
+      setError(err.message || "Unable to start payment. Please try again.");
       setLoading(false);
     }
   };
@@ -116,16 +199,11 @@ function BookingCard({ property }) {
       <h2>Reserve your stay</h2>
 
       <p className="booking-nightly-price">
-        <strong>
-          ₹{pricePerNight.toLocaleString("en-IN")}
-        </strong>{" "}
-        / night
+        <strong>₹{pricePerNight.toLocaleString("en-IN")}</strong> / night
       </p>
 
       <form onSubmit={handleBooking}>
-        <label htmlFor="booking-check-in">
-          Check-in
-        </label>
+        <label htmlFor="booking-check-in">Check-in</label>
 
         <input
           id="booking-check-in"
@@ -149,9 +227,7 @@ function BookingCard({ property }) {
           required
         />
 
-        <label htmlFor="booking-check-out">
-          Check-out
-        </label>
+        <label htmlFor="booking-check-out">Check-out</label>
 
         <input
           id="booking-check-out"
@@ -166,9 +242,7 @@ function BookingCard({ property }) {
           required
         />
 
-        <label htmlFor="booking-guests">
-          Guests
-        </label>
+        <label htmlFor="booking-guests">Guests</label>
 
         <select
           id="booking-guests"
@@ -179,26 +253,23 @@ function BookingCard({ property }) {
             setSuccess("");
           }}
         >
-          {Array.from(
-            { length: maxGuests },
-            (_, index) => index + 1
-          ).map((count) => (
-            <option key={count} value={count}>
-              {count} {count === 1 ? "guest" : "guests"}
-            </option>
-          ))}
+          {Array.from({ length: maxGuests }, (_, index) => index + 1).map(
+            (count) => (
+              <option key={count} value={count}>
+                {count} {count === 1 ? "guest" : "guests"}
+              </option>
+            )
+          )}
         </select>
 
         {nights > 0 && (
           <div className="booking-price-summary">
             <p>
-              ₹{pricePerNight.toLocaleString("en-IN")} ×{" "}
-              {nights} {nights === 1 ? "night" : "nights"}
+              ₹{pricePerNight.toLocaleString("en-IN")} × {nights}{" "}
+              {nights === 1 ? "night" : "nights"}
             </p>
 
-            <h3>
-              Total: ₹{totalPrice.toLocaleString("en-IN")}
-            </h3>
+            <h3>Total: ₹{totalPrice.toLocaleString("en-IN")}</h3>
           </div>
         )}
 
@@ -219,7 +290,7 @@ function BookingCard({ property }) {
           className="booking-button"
           disabled={loading}
         >
-          {loading ? "Creating booking..." : "Reserve"}
+          {loading ? "Processing..." : "Reserve & Pay"}
         </button>
       </form>
     </section>

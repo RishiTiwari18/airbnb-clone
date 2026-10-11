@@ -34,7 +34,42 @@ export const createBooking = async ({
     throw new Error(data.message || "Unable to create booking");
   }
 
-  return data.booking;
+  return data;
+};
+
+export const verifyPayment = async ({
+  bookingId,
+  razorpay_order_id,
+  razorpay_payment_id,
+  razorpay_signature,
+}) => {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Please log in to verify payment");
+  }
+
+  const response = await fetch(`${API_URL}/verify-payment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      bookingId,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Payment verification failed");
+  }
+
+  return data;
 };
 
 export const fetchMyBookings = async () => {
