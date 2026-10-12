@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:5000/api/wishlist";
+import API_BASE_URL from "./api";
+
+const API_URL = `${API_BASE_URL}/api/wishlist`;
 
 const getToken = () => {
   return localStorage.getItem("token");
@@ -45,13 +47,10 @@ export const addToWishlist = async (propertyId) => {
 };
 
 export const removeFromWishlist = async (propertyId) => {
-  const response = await fetch(
-    `${API_URL}/${propertyId}`,
-    {
-      method: "DELETE",
-      headers: getHeaders(),
-    }
-  );
+  const response = await fetch(`${API_URL}/${propertyId}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
 
   const data = await response.json();
 

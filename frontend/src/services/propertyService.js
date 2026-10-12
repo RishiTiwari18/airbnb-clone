@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:5000/api/properties";
+import API_BASE_URL from "./api";
+
+const API_URL = `${API_BASE_URL}/api/properties`;
 
 const getToken = () => {
   const token = localStorage.getItem("token");
@@ -25,9 +27,7 @@ const request = async (url, options = {}) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(
-      data.message || "Something went wrong"
-    );
+    throw new Error(data.message || "Something went wrong");
   }
 
   return data;
@@ -44,10 +44,7 @@ export const createProperty = async (propertyData) => {
   });
 };
 
-export const updateProperty = async (
-  propertyId,
-  propertyData
-) => {
+export const updateProperty = async (propertyId, propertyData) => {
   return request(`${API_URL}/${propertyId}`, {
     method: "PUT",
     body: JSON.stringify(propertyData),

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import API_BASE_URL from "../services/api";
 import SearchBar from "../components/SearchBar";
 import CategoryBar from "../components/CategoryBar";
 import PropertyCard from "../components/PropertyCard";
@@ -13,7 +14,7 @@ const initialFilters = {
   bedrooms: "",
 };
 
-const API_URL = "http://localhost:5000/api/properties";
+const API_URL = `${API_BASE_URL}/api/properties`;
 
 function Home() {
   const [properties, setProperties] = useState([]);
@@ -57,7 +58,7 @@ function Home() {
         if (err.name !== "AbortError") {
           console.error("Property loading error:", err);
           setError(
-            "Unable to load properties. Please check that the backend server is running."
+            "Unable to load properties. Please check your backend connection."
           );
         }
       } finally {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import API_BASE_URL from "../services/api";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -72,7 +73,7 @@ function Register() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/register",
+        `${API_BASE_URL}/api/auth/register`,
         {
           method: "POST",
           headers: {
@@ -107,8 +108,7 @@ function Register() {
       setShowPassword(false);
     } catch (error) {
       setError(
-        error.message ||
-          "Something went wrong. Please try again."
+        error.message || "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -364,7 +364,10 @@ function Register() {
               </div>
 
               {error && (
-                <div className="register-feedback register-error" role="alert">
+                <div
+                  className="register-feedback register-error"
+                  role="alert"
+                >
                   <span>!</span>
                   <p>{error}</p>
                 </div>

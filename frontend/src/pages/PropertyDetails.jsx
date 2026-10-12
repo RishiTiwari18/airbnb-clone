@@ -3,8 +3,9 @@ import { useParams, Link } from "react-router-dom";
 import BookingCard from "../components/BookingCard";
 import ReviewForm from "../components/ReviewForm";
 import ReviewList from "../components/ReviewList";
+import API_BASE_URL from "../services/api";
 
-const API_URL = "http://localhost:5000/api/properties";
+const API_URL = `${API_BASE_URL}/api/properties`;
 
 function PropertyDetails() {
   const { id } = useParams();

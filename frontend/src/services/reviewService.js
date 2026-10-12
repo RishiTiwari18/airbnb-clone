@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:5000/api/reviews";
+import API_BASE_URL from "./api";
+
+const API_URL = `${API_BASE_URL}/api/reviews`;
 
 export const getPropertyReviews = async (propertyId) => {
   const response = await fetch(
@@ -8,9 +10,7 @@ export const getPropertyReviews = async (propertyId) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to fetch reviews"
-    );
+    throw new Error(data.message || "Failed to fetch reviews");
   }
 
   return data;
@@ -38,9 +38,7 @@ export const createReview = async (propertyId, reviewData) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to submit review"
-    );
+    throw new Error(data.message || "Failed to submit review");
   }
 
   return data;
